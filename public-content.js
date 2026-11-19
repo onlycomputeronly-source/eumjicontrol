@@ -9,11 +9,20 @@
     String(text || "").split(/\r?\n/).forEach((line) => {
       const value = line.trim();
       if (!value) return;
-      // 한 줄짜리 제목은 소제목으로, 나머지는 본문으로 표시
-      if (/^(기관 소개|설립 목적|운영 원칙|주요 업무|조직 구성|부서 안내|공개 자료실|정보공개 안내|문의 및 제안|\d{2}\s+.+)$/.test(value)) {
-        const h = document.createElement("h2"); h.textContent = value; container.appendChild(h);
+
+      // 관리자 본문에서 [제목]을 붙인 줄은 항상 동일한 소제목 서식으로 표시
+      const markedHeading = value.match(/^\[제목\]\s*(.+)$/);
+      // 기존에 작성한 콘텐츠와의 호환성을 위해 기존 제목 표현도 계속 인식
+      const legacyHeading = /^(기관 소개|설립 목적|운영 원칙|운영 슬로건|주요 업무|조직 구성|부서 안내|공개 자료실|정보공개 안내|문의 및 제안|기관 표식|\d{2}\s+.+)$/.test(value);
+
+      if (markedHeading || legacyHeading) {
+        const h = document.createElement("h2");
+        h.textContent = markedHeading ? markedHeading[1].trim() : value;
+        container.appendChild(h);
       } else {
-        const p = document.createElement("p"); p.textContent = value; container.appendChild(p);
+        const p = document.createElement("p");
+        p.textContent = value;
+        container.appendChild(p);
       }
     });
   }
